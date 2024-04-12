@@ -1,0 +1,18 @@
+name: Update Download URL
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save browser download urls to Github env variables
+        id: extract
+        run: |
+          MAC_DOWNLOAD_URL=$(jq -r '.release.assets[] | select(.browser_download_url | test("Check-Ins-.*\\.(pkg|dmg)$")) | .browser_download_url' $GITHUB_EVENT_PATH)
+          echo "MAC_DOWNLOAD_URL=$MAC_DOWNLOAD_URL" >> $GITHUB_ENV
+          WIN_DOWNLOAD_URL=$(jq -r '.release.assets[] | select(.browser_download_url | test("Check-Ins-Setup-.*\\.exe$")) | .browser_download_url' $GITHUB_EVENT_PATH)
+          echo "WIN_DOWNLOAD_URL=$WIN_DOWNLOAD_URL" >> $GITHUB_ENV
