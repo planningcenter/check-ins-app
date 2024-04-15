@@ -2,7 +2,7 @@ name: Update Download URL
 
 on:
   release:
-    types: [published, prereleased]
+    types: [published]
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -18,7 +18,12 @@ jobs:
           MAC_DOWNLOAD_URL=$(jq -r '.release.assets[] | select(.browser_download_url | test("Check-Ins-.*\\.(pkg|dmg)$")) | .browser_download_url' $GITHUB_EVENT_PATH)
           WIN_DOWNLOAD_URL=$(jq -r '.release.assets[] | select(.browser_download_url | test("Check-Ins-Setup-.*\\.exe$")) | .browser_download_url' $GITHUB_EVENT_PATH)
 
-          aws ssm put-parameter --name /application/parameters/check-ins/production/github/check-ins/desktop_app_download_url_mac --value $MAC_DOWNLOAD_URL --overwrite
-          aws ssm put-parameter --name /application/parameters/check-ins/staging/github/check-ins/desktop_app_download_url_mac --value $MAC_DOWNLOAD_URL --overwrite
-          aws ssm put-parameter --name /application/parameters/check-ins/production/github/check-ins/desktop_app_download_url_win --value $WIN_DOWNLOAD_URL --overwrite
-          aws ssm put-parameter --name /application/parameters/check-ins/staging/github/check-ins/desktop_app_download_url_win --value $WIN_DOWNLOAD_URL --overwrite
+          if [[ -n "$MAC_DOWNLOAD_URL" ]]; then
+            aws ssm put-parameter --name /application/parameters/check-ins/production/github/check-ins/desktop_app_download_url_mac --value $MAC_DOWNLOAD_URL --overwrite
+            aws ssm put-parameter --name /application/parameters/check-ins/staging/github/check-ins/desktop_app_download_url_mac --value $MAC_DOWNLOAD_URL --overwrite
+          fi
+
+          if [[ -n "$WIN_DOWNLOAD_URL" ]]; then
+            aws ssm put-parameter --name /application/parameters/check-ins/production/github/check-ins/desktop_app_download_url_win --value $WIN_DOWNLOAD_URL --overwrite
+            aws ssm put-parameter --name /application/parameters/check-ins/staging/github/check-ins/desktop_app_download_url_win --value $WIN_DOWNLOAD_URL --overwrite
+          fi
